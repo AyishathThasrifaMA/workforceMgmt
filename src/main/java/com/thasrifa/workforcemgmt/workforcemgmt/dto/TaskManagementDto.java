@@ -1,8 +1,5 @@
 package com.thasrifa.workforcemgmt.workforcemgmt.dto;
-
-
 import java.util.List;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.thasrifa.workforcemgmt.workforcemgmt.model.enums.ReferenceType;
@@ -10,7 +7,6 @@ import com.thasrifa.workforcemgmt.workforcemgmt.model.enums.Priority;
 import com.thasrifa.workforcemgmt.workforcemgmt.model.enums.Task;
 import com.thasrifa.workforcemgmt.workforcemgmt.model.enums.TaskStatus;
 import lombok.Data;
-
 
 @Data
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)

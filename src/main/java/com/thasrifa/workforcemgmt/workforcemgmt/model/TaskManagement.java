@@ -1,12 +1,9 @@
 package com.thasrifa.workforcemgmt.workforcemgmt.model;
-
-
 import com.thasrifa.workforcemgmt.workforcemgmt.model.enums.ReferenceType;
 import com.thasrifa.workforcemgmt.workforcemgmt.model.enums.Priority;
 import com.thasrifa.workforcemgmt.workforcemgmt.model.enums.Task;
 import com.thasrifa.workforcemgmt.workforcemgmt.model.enums.TaskStatus;
 import lombok.Data;
-
 
 @Data
 public class TaskManagement {

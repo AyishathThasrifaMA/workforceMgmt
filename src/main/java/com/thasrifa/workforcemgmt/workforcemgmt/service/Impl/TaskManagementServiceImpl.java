@@ -1,6 +1,4 @@
 package com.thasrifa.workforcemgmt.workforcemgmt.service.Impl;
-
-
 import com.thasrifa.workforcemgmt.workforcemgmt.exception.ResourceNotFoundException;
 import com.thasrifa.workforcemgmt.workforcemgmt.dto.*;
 import com.thasrifa.workforcemgmt.workforcemgmt.mapper.ITaskManagementMapper;
@@ -12,27 +10,19 @@ import com.thasrifa.workforcemgmt.workforcemgmt.repository.TaskActivityHistoryRe
 import com.thasrifa.workforcemgmt.workforcemgmt.repository.TaskCommentRepository;
 import com.thasrifa.workforcemgmt.workforcemgmt.repository.TaskRepository;
 import com.thasrifa.workforcemgmt.workforcemgmt.service.TaskManagementService;
-
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @Service
 @Primary
 public class TaskManagementServiceImpl implements TaskManagementService {
-
-
    private final TaskRepository taskRepository;
    private final ITaskManagementMapper taskMapper;
    private final TaskCommentRepository taskCommentRepository;
    private final TaskActivityHistoryRepository taskActivityHistoryRepository;
-
-
 
    public TaskManagementServiceImpl(TaskRepository taskRepository, ITaskManagementMapper taskMapper, TaskCommentRepository taskCommentRepository,
                                      TaskActivityHistoryRepository taskActivityHistoryRepository) {
@@ -42,24 +32,17 @@ public class TaskManagementServiceImpl implements TaskManagementService {
        this.taskActivityHistoryRepository = taskActivityHistoryRepository;
    }
 
-
    @Override
     public TaskManagementDto findTaskById(Long id) {
         TaskManagement task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + id));
-        
-        // Corrected logic: map the main task and then fetch and set comments and activity history.
         TaskManagementDto dto = taskMapper.modelToDto(task);
-        
         List<TaskComment> comments = taskCommentRepository.findByTaskIdOrderByCreatedAtAsc(id);
         dto.setComments(taskMapper.commentModelListToDtoList(comments));
-
         List<TaskActivityHistory> activityHistory = taskActivityHistoryRepository.findByTaskIdOrderByCreatedAtAsc(id);
         dto.setActivityHistory(taskMapper.activityModelListToDtoList(activityHistory));
-        
         return dto;
     }
-
 
    @Override
    public List<TaskManagementDto> createTasks(TaskCreateRequest createRequest) {
@@ -86,8 +69,6 @@ public class TaskManagementServiceImpl implements TaskManagementService {
        for (UpdateTaskRequest.RequestItem item : updateRequest.getRequests()) {
            TaskManagement task = taskRepository.findById(item.getTaskId())
                    .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + item.getTaskId()));
-
-
            if (item.getTaskStatus() != null) {
                task.setStatus(item.getTaskStatus());
            }
@@ -98,20 +79,23 @@ public class TaskManagementServiceImpl implements TaskManagementService {
        }
        return taskMapper.modelListToDtoList(updatedTasks);
    }
+   
+    // get all 
+    @Override
+    public List<TaskManagementDto> getAllTasks() {
+        List<TaskManagement> tasks = taskRepository.findAll();
+        return taskMapper.modelListToDtoList(tasks);
+    }
 
 
 //    @Override
 //    public String assignByReference(AssignByReferenceRequest request) {
 //        List<Task> applicableTasks = Task.getTasksByReferenceType(request.getReferenceType());
 //        List<TaskManagement> existingTasks = taskRepository.findByReferenceIdAndReferenceType(request.getReferenceId(), request.getReferenceType());
-
-
 //        for (Task taskType : applicableTasks) {
 //            List<TaskManagement> tasksOfType = existingTasks.stream()
 //                    .filter(t -> t.getTask() == taskType && t.getStatus() != TaskStatus.COMPLETED)
 //                    .collect(Collectors.toList());
-
-
 //            // BUG #1 is here. It should assign one and cancel the rest.
 //            // Instead, it reassigns ALL of them.
 //            if (!tasksOfType.isEmpty()) {
@@ -137,20 +121,15 @@ public class TaskManagementServiceImpl implements TaskManagementService {
     public String assignByReference(AssignByReferenceRequest request) {
         List<Task> applicableTasks = Task.getTasksByReferenceType(request.getReferenceType());
         List<TaskManagement> existingTasks = taskRepository.findByReferenceIdAndReferenceType(request.getReferenceId(), request.getReferenceType());
-
         for (Task taskType : applicableTasks) {
             List<TaskManagement> tasksOfType = existingTasks.stream()
                     .filter(t -> t.getTask() == taskType && t.getStatus() != TaskStatus.COMPLETED)
                     .collect(Collectors.toList());
-
-        // ✅ Cancel all existing tasks of this type
             for (TaskManagement oldTask : tasksOfType) {
                 oldTask.setStatus(TaskStatus.CANCELLED);
                 oldTask.setDescription("Cancelled due to reassignment.");
                 taskRepository.save(oldTask);
             }
-
-        // ✅ Create a new task for the new assignee
         
             TaskManagement newTask = new TaskManagement();
             newTask.setId(null); // Force Hibernate to treat it as a new entity
@@ -162,20 +141,14 @@ public class TaskManagementServiceImpl implements TaskManagementService {
             newTask.setDescription("Reassigned task.");
             newTask.setPriority(Priority.MEDIUM); // default or choose appropriately
             newTask.setTaskDeadlineTime(System.currentTimeMillis() + 86400000); // +1 day or use your logic
-
             taskRepository.save(newTask);
         }
-
         return "Tasks reassigned successfully for reference " + request.getReferenceId();
     }
-
-
 
 //    @Override
 //    public List<TaskManagementDto> fetchTasksByDate(TaskFetchByDateRequest request) {
 //        List<TaskManagement> tasks = taskRepository.findByAssigneeIdIn(request.getAssigneeIds());
-
-
 //        // BUG #2 is here. It should filter out CANCELLED tasks but doesn't.
 //        List<TaskManagement> filteredTasks = tasks.stream()
 //                .filter(task -> {
@@ -185,39 +158,29 @@ public class TaskManagementServiceImpl implements TaskManagementService {
 //                    return true;
 //                })
 //                .collect(Collectors.toList());
-
-
 //        return taskMapper.modelListToDtoList(filteredTasks);
 //    }
 
     @Override
     public List<TaskManagementDto> fetchTasksByDate(TaskFetchByDateRequest request) {
         List<TaskManagement> tasks = taskRepository.findByAssigneeIdIn(request.getAssigneeIds());
-
         List<TaskManagement> filteredTasks = tasks.stream()
                 .filter(task -> {
-                // Check deadline range
                     Long deadline = task.getTaskDeadlineTime();
                     boolean inDateRange = deadline >= request.getStartDate() && deadline <= request.getEndDate();
-
-                // Check not CANCELLED
                     boolean notCancelled = task.getStatus() != TaskStatus.CANCELLED;
-
                     return inDateRange && notCancelled;
                 })
                 .collect(Collectors.toList());
-
         return taskMapper.modelListToDtoList(filteredTasks);
     }
 
-    // feature 1 
+    // feature 1 smart
     @Override
     public List<TaskManagementDto> fetchSmartDailyTasks(TaskFetchByDateRequest request) {
         long start = request.getStartDate();
         long end = request.getEndDate();
-
         List<TaskManagement> tasks = taskRepository.findAll();
-
         List<TaskManagement> smartFilteredTasks = tasks.stream()
                 .filter(task -> isTaskActive(task.getStatus()))
                 .filter(task ->
@@ -225,10 +188,8 @@ public class TaskManagementServiceImpl implements TaskManagementService {
                         (task.getTaskDeadlineTime() < start) // started before but still open
                 )
                 .collect(Collectors.toList());
-
         return taskMapper.modelListToDtoList(smartFilteredTasks);
     }
-
     private boolean isTaskActive(TaskStatus status) {
         return status != null && status != TaskStatus.CANCELLED && status != TaskStatus.COMPLETED;
     }
@@ -248,34 +209,20 @@ public class TaskManagementServiceImpl implements TaskManagementService {
         return taskMapper.modelListToDtoList(tasks);
     }
 
-
-    // for get all 
-    @Override
-    public List<TaskManagementDto> getAllTasks() {
-        List<TaskManagement> tasks = taskRepository.findAll();
-        return taskMapper.modelListToDtoList(tasks);
-    }
-
-    //f3
+    //feature3
      @Override
     public TaskCommentDto addCommentToTask(TaskCommentRequestDto requestDto) {
         TaskManagement task = taskRepository.findById(requestDto.getTaskId())
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + requestDto.getTaskId()));
-
         TaskComment comment = new TaskComment();
         comment.setTaskId(requestDto.getTaskId());
         comment.setUserId(requestDto.getUserId());
         comment.setCommentText(requestDto.getCommentText());
         comment.setCreatedAt(System.currentTimeMillis());
-
         TaskComment savedComment = taskCommentRepository.save(comment);
-
-        // Log the activity
         logActivity(task.getId(), String.format("User %d added a comment.", requestDto.getUserId()));
-
         return taskMapper.commentModelToDto(savedComment);
     }
-
     private void logActivity(Long taskId, String message) {
         TaskActivityHistory activity = new TaskActivityHistory();
         activity.setTaskId(taskId);
@@ -283,6 +230,4 @@ public class TaskManagementServiceImpl implements TaskManagementService {
         activity.setCreatedAt(System.currentTimeMillis());
         taskActivityHistoryRepository.save(activity);
     }
-
-
 }

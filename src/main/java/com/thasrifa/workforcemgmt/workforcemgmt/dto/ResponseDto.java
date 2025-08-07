@@ -1,5 +1,4 @@
 package com.thasrifa.workforcemgmt.workforcemgmt.dto;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

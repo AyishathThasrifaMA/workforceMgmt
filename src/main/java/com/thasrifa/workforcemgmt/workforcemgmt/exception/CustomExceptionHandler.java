@@ -1,6 +1,4 @@
 package com.thasrifa.workforcemgmt.workforcemgmt.exception;
-
-
 import com.thasrifa.workforcemgmt.workforcemgmt.model.response.Response;
 import com.thasrifa.workforcemgmt.workforcemgmt.model.response.ResponseStatus;
 import org.springframework.http.HttpStatus;
@@ -9,18 +7,14 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-
 @ControllerAdvice
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
-
-
    @ExceptionHandler(ResourceNotFoundException.class)
    public final ResponseEntity<Response<Object>> handleResourceNotFoundException(ResourceNotFoundException ex) {
        ResponseStatus status = new ResponseStatus(StatusCode.NOT_FOUND.getCode(), ex.getMessage());
        Response<Object> response = new Response<>(null, null, status);
        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
    }
-
 
    @ExceptionHandler(Exception.class)
    public final ResponseEntity<Response<Object>> handleAllExceptions(Exception ex) {

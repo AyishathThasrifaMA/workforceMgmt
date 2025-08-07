@@ -1,12 +1,7 @@
 package com.thasrifa.workforcemgmt.workforcemgmt.service;
-
-
 import com.thasrifa.workforcemgmt.workforcemgmt.dto.*;
 import com.thasrifa.workforcemgmt.workforcemgmt.model.enums.Priority;
-
-import java.time.LocalDate;
 import java.util.List;
-
 
 public interface TaskManagementService {
    List<TaskManagementDto> createTasks(TaskCreateRequest request);
@@ -17,12 +12,8 @@ public interface TaskManagementService {
    List<TaskManagementDto> fetchSmartDailyTasks(TaskFetchByDateRequest request);
    void updateTaskPriority(Long taskId, Priority newPriority);
    List<TaskManagementDto> getTasksByPriority(Priority priority);
-   TaskCommentDto addCommentToTask(TaskCommentRequestDto requestDto);
-
-   //for get all 
+   TaskCommentDto addCommentToTask(TaskCommentRequestDto requestDto); 
    List<TaskManagementDto> getAllTasks();
-  
-
 }
 
 

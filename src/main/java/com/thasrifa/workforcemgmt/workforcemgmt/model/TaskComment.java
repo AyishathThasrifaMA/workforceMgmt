@@ -1,5 +1,4 @@
 package com.thasrifa.workforcemgmt.workforcemgmt.model;
-
 import lombok.Data;
 
 @Data

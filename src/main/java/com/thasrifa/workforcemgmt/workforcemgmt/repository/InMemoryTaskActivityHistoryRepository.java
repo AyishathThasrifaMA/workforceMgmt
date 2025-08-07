@@ -1,8 +1,6 @@
 package com.thasrifa.workforcemgmt.workforcemgmt.repository;
-
 import com.thasrifa.workforcemgmt.workforcemgmt.model.TaskActivityHistory;
 import org.springframework.stereotype.Repository;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +11,6 @@ import java.util.stream.Collectors;
 
 @Repository
 public class InMemoryTaskActivityHistoryRepository implements TaskActivityHistoryRepository {
-
     private final Map<Long, TaskActivityHistory> activityStore = new ConcurrentHashMap<>();
     private final AtomicLong idCounter = new AtomicLong(0);
 

@@ -1,6 +1,4 @@
 package com.thasrifa.workforcemgmt.workforcemgmt.model.enums;
-
-
 public enum Priority {
    LOW,
    MEDIUM,
